@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.Transparent" parent="Theme.AppCompat.Light.NoActionBar">
+
+        <item name="colorPrimary">@color/app_header</item>
+        <item name="colorPrimaryDark">@color/app_header_dark</item>
+
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+
+        <!-- This will set a translucent tint on the StatusBar and will be available on API Level 19 or greater -->
+        <item name="android:windowTranslucentStatus">true</item>
+    </style>
+</resources>
