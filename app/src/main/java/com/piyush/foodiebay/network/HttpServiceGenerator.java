@@ -90,9 +90,6 @@ public class HttpServiceGenerator {
                 Request request = original.newBuilder()
                         .header("Accept", "application/json")
                         .header("X-App-Token", BuildConfig.APP_TOKEN)
-                        .header("deviceModel", Build.MODEL)
-                        .header("deviceManufacturer", Build.MANUFACTURER)
-                        .header("deviceVersion", String.valueOf(Build.VERSION.SDK_INT))
                         .method(original.method(), original.body())
                         .build();
 
