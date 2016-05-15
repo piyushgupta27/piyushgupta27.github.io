@@ -36,15 +36,6 @@
     <dimen name="text_xlarge">24sp</dimen>
     <dimen name="text_xxlarge">34sp</dimen>
 
-    <!-- Use standard Elevations -->
-    <dimen name="elevation_base">2dp</dimen>
-    <dimen name="elevation_medium">4dp</dimen>
-    <dimen name="elevation_high">8dp</dimen>
-
-    <!-- Card View Corner Radius -->
-    <dimen name="card_corner_radius">4dp</dimen>
-    <dimen name="card_corner_radius_low">2dp</dimen>
-
     <dimen name="toolbar_height">@dimen/abc_action_bar_default_height_material</dimen>
 
 </resources>

@@ -29,6 +29,11 @@ public class NetworkUtils {
         return false;
     }
 
+    /**
+     * Handle Network Call Failure
+     * @param context
+     * @param t Determines the type of failure and hence the error message.
+     */
     public static void handleCallFailure(final Context context, Throwable t) {
 
         if (t instanceof SocketTimeoutException) {

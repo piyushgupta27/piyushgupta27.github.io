@@ -3,13 +3,14 @@ package com.piyush.foodiebay;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -31,8 +32,6 @@ import com.piyush.foodiebay.utils.ErrorMessages;
 import com.piyush.foodiebay.utils.NetworkUtils;
 import com.piyush.foodiebay.utils.Notify;
 
-import java.io.IOException;
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,12 +49,13 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
     private GoogleMap mGoogleMap;
     private ClusterManager<MyLocationItem> mClusterManager;
 
+    private Toolbar toolbar;
     private ImageView filterIcon;
     private Spinner filterSpinner;
 
     private ApiService apiService;
     private Call<ArrayList<FoodFacility>> getFoodFacilitiesCall;
-    private ArrayList<FoodFacility> foodFacilities;
+    private ArrayList<FoodFacility> foodFacilities = new ArrayList<>();
     private List<String> foodFacilityTypes = new ArrayList<>();
 
     private ArrayAdapter filterSpinnerAdapter;
@@ -63,6 +63,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
     private String selectedFacilityType = Constants.FACILITY_TYPE_ALL;
 
     public static final int NETWORK_CALL_DATA_MAX_LIMIT = 1000;
+    private boolean isRefreshIconVisible = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +73,8 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
         //Initialize the toolbar with title specified
         initToolbar("FoodieBay");
 
-        //Initialize Filter layout views
+        //Initialize Layout views
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         filterSpinner = (Spinner) findViewById(R.id.main_filter_spinner);
         filterIcon = (ImageView) findViewById(R.id.main_filter_icon);
         filterIcon.setOnClickListener(new View.OnClickListener() {
@@ -101,6 +103,8 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
 
     public void fetchFoodFacilitiesData() {
         displayLoader(true);
+        isRefreshIconVisible = false;
+        invalidateOptionsMenu();
 
         apiService = HttpServiceGenerator.generate(this, ApiService.class);
         getFoodFacilitiesCall = apiService.getFoodFacilities(NETWORK_CALL_DATA_MAX_LIMIT, null);
@@ -124,6 +128,8 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
 
                     // Hide loader in case no data was fetched from server
                     displayLoader(false);
+                    isRefreshIconVisible = true;
+                    invalidateOptionsMenu();
                 }
             }
 
@@ -131,6 +137,8 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
             public void onFailure(Call<ArrayList<FoodFacility>> call, Throwable t) {
                 Log.e("MainActivity", t.getMessage());
                 displayLoader(false);
+                isRefreshIconVisible = true;
+                invalidateOptionsMenu();
 
                 //Handle Network Call Failure
                 NetworkUtils.handleCallFailure(MainActivity.this, t);
@@ -145,7 +153,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
         // Enable MyLocationButton on Map only if Location Permission has been granted
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
-            mGoogleMap.setMyLocationEnabled(true);
+//            mGoogleMap.setMyLocationEnabled(true);
         }
 
         // Initiate the map with a default position
@@ -190,6 +198,9 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
 
             if (foodFacilities != null && foodFacilities.size() > 0) {
 
+                // Clear the already present Clusters
+                mClusterManager.clearItems();
+
                 //Parse dataset to retrieve Cluster MyLocationItem List
                 List<MyLocationItem> itemList = parseFoodFacilitiesList(foodFacilities, selectedFacilityType, true);
                 mClusterManager.addItems(itemList);
@@ -218,6 +229,8 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
 
                 // Hide loader after both map is Ready and data has been fetched
                 displayLoader(false);
+                isRefreshIconVisible = true;
+                invalidateOptionsMenu();
             }
         }
     }
@@ -228,6 +241,8 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
      */
     private void filterFoodFacilities(String selectedFacilityType) {
         displayLoader(true);
+        isRefreshIconVisible = false;
+        invalidateOptionsMenu();
 
         // Clear the already present Clusters
         mClusterManager.clearItems();
@@ -238,6 +253,8 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
         mClusterManager.cluster();
 
         displayLoader(false);
+        isRefreshIconVisible = true;
+        invalidateOptionsMenu();
     }
 
     /**
@@ -284,6 +301,32 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
         }
 
         return itemList;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        toolbar.inflateMenu(R.menu.menu_main);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_refresh_data:
+
+                //Fetch food facilities data from Server
+                fetchFoodFacilitiesData();
+
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu (Menu menu) {
+        menu.getItem(0).setVisible(isRefreshIconVisible);
+        return true;
     }
 
     @Override
