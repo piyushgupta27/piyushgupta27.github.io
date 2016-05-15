@@ -1,0 +1,91 @@
+ext.vMajor = 1
+ext.vMinor = 0
+ext.vPatch = 0
+
+buildscript {
+    repositories {
+        maven { url 'https://maven.fabric.io/public' }
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'io.fabric.tools:gradle:1.+'
+    }
+}
+
+apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
+
+repositories {
+    maven { url 'https://maven.fabric.io/public' }
+    flatDir {
+        dirs 'libs'
+    }
+}
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.3"
+
+    defaultConfig {
+        applicationId "com.piyush.foodiebay"
+        minSdkVersion 16
+        targetSdkVersion 23
+        buildConfigField "String", "URL_ENDPOINT", "\"https://data.sfgov.org/resource/6a9r-agq8.json/\""
+        buildConfigField "String", "ENV", "\"RELEASE\""
+        buildConfigField "String", "APP_TOKEN", "\"KpQgtEVbtIYpRDtInfH4Bm1XD\""
+        buildConfigField "String", "SECRET_TOKEN", "\"VDszLy7FlBVlAcRWnZL51eBB8VTnqYVizs0F\""
+        resValue "string", "GOOGLE_MAPS_API_KEY", "AIzaSyBzPkg3dDAXzm_psiLWUWm27wVrE2UxE7s"
+        versionName computeVersionName()
+        versionCode computeVersionCode()
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            buildConfigField "String", "URL_ENDPOINT", "\"https://data.sfgov.org/resource/6a9r-agq8.json/\""
+            buildConfigField "String", "ENV", "\"RELEASE\""
+            buildConfigField "String", "APP_TOKEN", "\"KpQgtEVbtIYpRDtInfH4Bm1XD\""
+            buildConfigField "String", "SECRET_TOKEN", "\"VDszLy7FlBVlAcRWnZL51eBB8VTnqYVizs0F\""
+            resValue "string", "GOOGLE_MAPS_API_KEY", "AIzaSyBzPkg3dDAXzm_psiLWUWm27wVrE2UxE7s"
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            output.outputFile = new File(
+                    output.outputFile.parent,
+                    output.outputFile.name.replace(".apk", "-${variant.versionName}.apk"))
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    testCompile 'junit:junit:4.12'
+    compile('com.crashlytics.sdk.android:crashlytics:2.5.5@aar') {
+        transitive = true;
+    }
+    compile 'com.android.support:appcompat-v7:23.3.0'
+    compile 'com.android.support:design:23.3.0'
+    compile 'com.android.support:cardview-v7:23.3.0'
+    compile 'com.android.support:appcompat-v7:23.0.0'
+
+    compile 'com.google.code.gson:gson:2.6.2'
+    compile 'com.squareup.retrofit2:retrofit:2.0.2'
+    compile 'com.squareup.retrofit2:converter-gson:2.0.2'
+    compile 'com.squareup.okhttp3:logging-interceptor:3.2.0'
+
+    compile 'com.google.android.gms:play-services-gcm:8.3.0'
+    compile 'com.google.android.gms:play-services-location:8.3.0'
+    compile 'com.google.android.gms:play-services-maps:8.3.0'
+
+    compile 'com.google.maps.android:android-maps-utils:0.4+'
+}
+
+def computeVersionName() {
+    return String.format('%d.%d.%d', vMajor, vMinor, vPatch)
+}
+def computeVersionCode() {
+    return (vMajor * 10000) + (vMinor * 1000) + (vPatch)
+}
