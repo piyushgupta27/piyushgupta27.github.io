@@ -15,5 +15,5 @@ public interface ApiService {
 
     @GET("https://data.sfgov.org/resource/6a9r-agq8.json/")
     Call<ArrayList<FoodFacility>> getFoodFacilities(@Query("$limit") final int limit,
-                                                    @Query("$where=") final String whereClause);
+                                                    @Query("$where") final String whereClause);
 }

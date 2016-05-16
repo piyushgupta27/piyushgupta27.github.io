@@ -46,4 +46,13 @@
         <item name="android:backgroundDimEnabled">false</item>
     </style>
 
+    <style name="TextAppearance.Widget.ActionBar.Title"
+        parent="@android:style/TextAppearance.Medium"/>
+
+    <style name="TextAppearance.ActionBarTitle" parent="TextAppearance.Widget.ActionBar.Title">
+        <item name="android:textSize">@dimen/text_large</item>
+        <item name="android:textColor">@color/text_light_bg</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
 </resources>
