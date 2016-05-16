@@ -1,8 +1,8 @@
 package com.piyush.foodiebay;
 
-import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
+import android.os.Handler;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -48,22 +48,24 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
 
     private GoogleMap mGoogleMap;
     private ClusterManager<MyLocationItem> mClusterManager;
+    private LatLng northeast, southwest;
 
     private Toolbar toolbar;
     private ImageView filterIcon;
     private Spinner filterSpinner;
+    private ArrayAdapter filterSpinnerAdapter;
 
     private ApiService apiService;
     private Call<ArrayList<FoodFacility>> getFoodFacilitiesCall;
     private ArrayList<FoodFacility> foodFacilities = new ArrayList<>();
     private List<String> foodFacilityTypes = new ArrayList<>();
-
-    private ArrayAdapter filterSpinnerAdapter;
-
     private String selectedFacilityType = Constants.FACILITY_TYPE_ALL;
 
-    public static final int NETWORK_CALL_DATA_MAX_LIMIT = 1000;
-    private boolean isRefreshIconVisible = true;
+    public static final int NETWORK_CALL_DATA_MAX_LIMIT = 1000, NETWORK_CALL_INITIATE_DELAY = 1500;
+    private boolean networkCallEnqueued = true;
+    private Handler cameraChangeHandler;
+    private Runnable cameraChangeRunnable;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +73,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
         setContentView(R.layout.activity_main);
 
         //Initialize the toolbar with title specified
-        initToolbar("FoodieBay");
+        initToolbar();
 
         //Initialize Layout views
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -96,18 +98,14 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.main_map);
         mapFragment.getMapAsync(this);
-
-        //Fetch food facilities data from Server
-        fetchFoodFacilitiesData();
     }
 
-    public void fetchFoodFacilitiesData() {
+    public void fetchFoodFacilitiesData(String whereClause) {
         displayLoader(true);
-        isRefreshIconVisible = false;
-        invalidateOptionsMenu();
+        displayRefreshIcon(false);
 
         apiService = HttpServiceGenerator.generate(this, ApiService.class);
-        getFoodFacilitiesCall = apiService.getFoodFacilities(NETWORK_CALL_DATA_MAX_LIMIT, null);
+        getFoodFacilitiesCall = apiService.getFoodFacilities(NETWORK_CALL_DATA_MAX_LIMIT, whereClause);
 
         getFoodFacilitiesCall.enqueue(new Callback<ArrayList<FoodFacility>>() {
             @Override
@@ -128,20 +126,19 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
 
                     // Hide loader in case no data was fetched from server
                     displayLoader(false);
-                    isRefreshIconVisible = true;
-                    invalidateOptionsMenu();
+                    displayRefreshIcon(true);
                 }
             }
 
             @Override
             public void onFailure(Call<ArrayList<FoodFacility>> call, Throwable t) {
                 Log.e("MainActivity", t.getMessage());
-                displayLoader(false);
-                isRefreshIconVisible = true;
-                invalidateOptionsMenu();
 
                 //Handle Network Call Failure
                 NetworkUtils.handleCallFailure(MainActivity.this, t);
+
+                displayLoader(false);
+                displayRefreshIcon(true);
             }
         });
     }
@@ -150,16 +147,10 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
     public void onMapReady(GoogleMap googleMap) {
         mGoogleMap = googleMap;
 
-        // Enable MyLocationButton on Map only if Location Permission has been granted
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-//            mGoogleMap.setMyLocationEnabled(true);
-        }
-
         // Initiate the map with a default position
         LatLng defaultLatLng = new LatLng(Constants.MAP_DEFAULT_LATITUDE_SAN_FRANCISCO,
                 Constants.MAP_DEFAULT_LONGITUDE_SAN_FRANCISCO);
-        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLatLng, 12.0f));
+        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLatLng, 14.0f));
 
         // Initialize the manager with the context and the map.
         // (Activity extends context, so we can pass 'this' in the constructor.)
@@ -172,27 +163,84 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
             public void onCameraChange(CameraPosition cameraPosition) {
                 mClusterManager.onCameraChange(cameraPosition);
 
-                //LatLng Bounds of Current Visible Screen on Map Change
-                LatLngBounds currScreen = mGoogleMap.getProjection().getVisibleRegion().latLngBounds;
-                Log.d(TAG, "Northeast lat, lng: " + currScreen.northeast.latitude + ", " + currScreen.northeast.longitude);
-                Log.d(TAG, "Southwest lat, lng: " + currScreen.southwest.latitude + ", " + currScreen.southwest.longitude);
+                if (cameraChangeHandler != null && cameraChangeRunnable != null) {
+                    cameraChangeHandler.removeCallbacks(cameraChangeRunnable);
+                }
+
+                cameraChangeRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        // Get current visible screen LatLngBounds and food facility data for this area
+                        getVisibleScreenBounds(mGoogleMap);
+                    }
+                };
+                cameraChangeHandler = new Handler();
+                cameraChangeHandler.postDelayed(cameraChangeRunnable, NETWORK_CALL_INITIATE_DELAY);
             }
         });
         mGoogleMap.setOnMarkerClickListener(mClusterManager);
 
-        //Set Custom Rendering
+        // Set Custom Rendering
         mClusterManager.setRenderer(new CustomMapsClusterRendering(getApplicationContext(),
                 mGoogleMap, mClusterManager));
-
-        //LatLng Bounds of Current Visible Screen
-        LatLngBounds currScreen = mGoogleMap.getProjection().getVisibleRegion().latLngBounds;
-        Log.d(TAG, "Northeast lat, lng: " + currScreen.northeast.latitude + ", " + currScreen.northeast.longitude);
-        Log.d(TAG, "Southwest lat, lng: " + currScreen.southwest.latitude + ", " + currScreen.southwest.longitude);
-
-        // Add cluster items (markers) to the cluster manager.
-        displayFetchedFoodFacilities();
     }
 
+    /**
+     * Method to get current screen visible LatLngBounds from the map.
+     *
+     * @param mGoogleMap
+     */
+    private void getVisibleScreenBounds(GoogleMap mGoogleMap) {
+        //LatLng Bounds of Current Visible Screen
+        LatLngBounds currScreen = mGoogleMap.getProjection().getVisibleRegion().latLngBounds;
+        if (currScreen != null) {
+
+            northeast = currScreen.northeast;
+            southwest = currScreen.southwest;
+
+            if (northeast != null && southwest != null) {
+
+                Log.d(TAG, "Northeast lat, lng: " + currScreen.northeast.latitude + ", " +
+                        currScreen.northeast.longitude);
+                Log.d(TAG, "Southwest lat, lng: " + currScreen.southwest.latitude + ", " +
+                        currScreen.southwest.longitude);
+
+                String whereClause = getQueryFromLatLng(currScreen.northeast, currScreen.southwest);
+
+                //Fetch food facilities data from Server
+                fetchFoodFacilitiesData(whereClause);
+            }
+        }
+    }
+
+    /**
+     * Method to get query string from northeast and southwest LatLng coordinates of the map to fetch
+     * data specific to the current visible screen.
+     *
+     * @param northeast LatLng coordinates of the NorthEast corner of the currently visible screen.
+     * @param southwest LatLng coordinates of the SouthWest corner of the currently visible screen.
+     * @return
+     */
+    private String getQueryFromLatLng(LatLng northeast, LatLng southwest) {
+
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("latitude between \'")
+                .append(southwest.latitude)
+                .append("\' and \'")
+                .append(northeast.latitude)
+                .append("\' and longitude*-1 between \'")
+                .append(northeast.longitude * -1)
+                .append("\' and \'")
+                .append(southwest.longitude * -1)
+                .append("\'");
+
+        return builder.toString();
+    }
+
+    /**
+     * Method to display fetched data in form of Clusters on the map
+     */
     private void displayFetchedFoodFacilities() {
         if (mGoogleMap != null) {
 
@@ -229,20 +277,19 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
 
                 // Hide loader after both map is Ready and data has been fetched
                 displayLoader(false);
-                isRefreshIconVisible = true;
-                invalidateOptionsMenu();
+                displayRefreshIcon(true);
             }
         }
     }
 
     /**
      * Method to filter the dataset on the basis of selectedFacilityType.
+     *
      * @param selectedFacilityType The Type of Facility selected to be filtered.
      */
     private void filterFoodFacilities(String selectedFacilityType) {
         displayLoader(true);
-        isRefreshIconVisible = false;
-        invalidateOptionsMenu();
+        displayRefreshIcon(false);
 
         // Clear the already present Clusters
         mClusterManager.clearItems();
@@ -252,16 +299,17 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
         mClusterManager.addItems(itemList);
         mClusterManager.cluster();
 
+        // Hide loader after both map is Ready and data has been fetched
         displayLoader(false);
-        isRefreshIconVisible = true;
-        invalidateOptionsMenu();
+        displayRefreshIcon(true);
     }
 
     /**
      * Method to parse the dataset fetched from server in order to retrieve MyLocationItem List reqd
      * to populate clusters on map.
-     * @param foodFacilities The raw dataset fetched from Server.
-     * @param foodFacilityType The type of Food Facility to be used as filter during parsing.
+     *
+     * @param foodFacilities        The raw dataset fetched from Server.
+     * @param foodFacilityType      The type of Food Facility to be used as filter during parsing.
      * @param getFoodFacilitiesType Flag to repopulate the FoodFacilityTypes List.
      * @return
      */
@@ -303,6 +351,16 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
         return itemList;
     }
 
+    /**
+     * Method to show/hide RefreshIcon whenever network call has been completed
+     *
+     * @param showRefreshIcon Flag to indicate whether to show/hide the Refresh Icon
+     */
+    private void displayRefreshIcon(final boolean showRefreshIcon) {
+        networkCallEnqueued = !showRefreshIcon;
+        invalidateOptionsMenu();
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         toolbar.inflateMenu(R.menu.menu_main);
@@ -315,8 +373,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
             case R.id.action_refresh_data:
 
                 //Fetch food facilities data from Server
-                fetchFoodFacilitiesData();
-
+                fetchFoodFacilitiesData(null);
                 break;
         }
 
@@ -324,8 +381,8 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
     }
 
     @Override
-    public boolean onPrepareOptionsMenu (Menu menu) {
-        menu.getItem(0).setVisible(isRefreshIconVisible);
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        menu.getItem(0).setVisible(!networkCallEnqueued);
         return true;
     }
 

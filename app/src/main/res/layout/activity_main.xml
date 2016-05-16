@@ -5,19 +5,26 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <android.support.design.widget.AppBarLayout
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        android:layout_height="?android:attr/actionBarSize"
+        android:background="@color/app_header"
+        android:theme="@style/AppTheme"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?android:attr/actionBarSize"
-            android:background="@color/app_header"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            app:title="@string/app_name" />
-    </android.support.design.widget.AppBarLayout>
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/app_icon" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/padding_base"
+            android:text="@string/app_name"
+            style="@style/TextAppearance.ActionBarTitle"/>
+        </android.support.v7.widget.Toolbar>
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -29,38 +36,45 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <FrameLayout
-                android:id="@+id/main.filter_spinner_layout"
+            <android.support.design.widget.AppBarLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/app_header_light"
-                android:orientation="horizontal"
-                android:visibility="visible">
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-                <ImageView
-                    android:id="@+id/main.filter_icon"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_gravity="start|center_vertical"
-                    android:layout_marginLeft="@dimen/margin_base"
-                    android:paddingBottom="@dimen/padding_base"
-                    android:paddingRight="@dimen/padding_base"
-                    android:paddingTop="@dimen/padding_base"
-                    android:src="@drawable/ic_filter" />
-
-                <Spinner
-                    android:id="@+id/main.filter_spinner"
+                <FrameLayout
+                    android:id="@+id/main.filter_spinner_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="right|center_vertical"
-                    android:background="?android:selectableItemBackground"
-                    android:gravity="center"
-                    android:paddingBottom="@dimen/padding_high"
-                    android:paddingLeft="48dp"
-                    android:paddingRight="@dimen/padding_base"
-                    android:paddingTop="@dimen/padding_high"
-                    android:theme="@style/AppTheme.AppBarOverlay" />
-            </FrameLayout>
+                    android:background="@color/app_background_light"
+                    android:orientation="horizontal"
+                    android:visibility="visible">
+
+                    <ImageView
+                        android:id="@+id/main.filter_icon"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_gravity="start|center_vertical"
+                        android:layout_marginLeft="@dimen/margin_base"
+                        android:paddingBottom="@dimen/padding_base"
+                        android:paddingRight="@dimen/padding_base"
+                        android:paddingTop="@dimen/padding_base"
+                        android:src="@drawable/ic_filter" />
+
+                    <Spinner
+                        android:id="@+id/main.filter_spinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right|center_vertical"
+                        android:background="?android:selectableItemBackground"
+                        android:gravity="center"
+                        android:paddingBottom="@dimen/padding_high"
+                        android:paddingLeft="48dp"
+                        android:paddingRight="@dimen/padding_base"
+                        android:paddingTop="@dimen/padding_high"
+                        android:theme="@style/AppTheme.AppBarOverlay" />
+                </FrameLayout>
+
+            </android.support.design.widget.AppBarLayout>
 
             <fragment
                 android:id="@+id/main.map"
@@ -69,7 +83,10 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:apiKey="@string/GOOGLE_MAPS_API_KEY"
-                android:background="@android:color/darker_gray" />
+                android:background="@android:color/darker_gray"
+                app:uiRotateGestures="true"
+                app:uiTiltGestures="false"
+                app:uiZoomControls="true" />
         </LinearLayout>
 
         <include layout="@layout/layout_loading" />
