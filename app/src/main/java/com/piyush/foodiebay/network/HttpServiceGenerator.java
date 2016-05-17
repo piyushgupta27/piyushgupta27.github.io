@@ -1,10 +1,8 @@
 package com.piyush.foodiebay.network;
 
 import android.content.Context;
-import android.os.Build;
 
 import com.piyush.foodiebay.BuildConfig;
-import com.piyush.foodiebay.utils.Constants;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -55,22 +53,7 @@ public class HttpServiceGenerator {
      */
     public static <S> S generate(final Context context, Class<S> serviceClass, long responseTimeout) {
 
-        if (BuildConfig.ENV.equalsIgnoreCase(Constants.ENV_RELEASE)) {
-            // For PROD environments
-            logging.setLevel(HttpLoggingInterceptor.Level.NONE);
-        } else {
-
-            // For basic information logging
-            //logging.setLevel(Level.BASIC);
-
-            // For basic + headers information logging
-            //logging.setLevel(Level.HEADERS);
-
-            // For detailed information logging
-            // [IMPORTANT] Use this level only if necessary
-            // because logs will clutter our Android monitor if we’re receiving large data sets
-            logging.setLevel(Level.BODY);
-        }
+        logging.setLevel(Level.BODY);
 
         /**
          * Use this interceptor to add request level headers

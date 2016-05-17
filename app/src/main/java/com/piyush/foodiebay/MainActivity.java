@@ -1,9 +1,7 @@
 package com.piyush.foodiebay;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -50,7 +48,6 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
     private ClusterManager<MyLocationItem> mClusterManager;
     private LatLng northeast, southwest;
 
-    private Toolbar toolbar;
     private ImageView filterIcon;
     private Spinner filterSpinner;
     private ArrayAdapter filterSpinnerAdapter;
@@ -61,7 +58,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
     private List<String> foodFacilityTypes = new ArrayList<>();
     private String selectedFacilityType = Constants.FACILITY_TYPE_ALL;
 
-    public static final int NETWORK_CALL_DATA_MAX_LIMIT = 1000, NETWORK_CALL_INITIATE_DELAY = 1500;
+    public static final int NETWORK_CALL_DATA_MAX_LIMIT = 1000, NETWORK_CALL_INITIATE_DELAY = 1000;
     private boolean networkCallEnqueued = true;
     private Handler cameraChangeHandler;
     private Runnable cameraChangeRunnable;
@@ -76,7 +73,6 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
         initToolbar();
 
         //Initialize Layout views
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
         filterSpinner = (Spinner) findViewById(R.id.main_filter_spinner);
         filterIcon = (ImageView) findViewById(R.id.main_filter_icon);
         filterIcon.setOnClickListener(new View.OnClickListener() {
@@ -112,7 +108,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
             public void onResponse(Call<ArrayList<FoodFacility>> call,
                                    Response<ArrayList<FoodFacility>> response) {
 
-                if (NetworkUtils.isCallSuccess(MainActivity.this, response)) {
+                if (NetworkUtils.isCallSuccess(response)) {
 
                     foodFacilities = response.body();
                     //Process the retrieved data to be shown on map
@@ -363,7 +359,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        toolbar.inflateMenu(R.menu.menu_main);
+        getToolbar().inflateMenu(R.menu.menu_main);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -371,7 +367,6 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_refresh_data:
-
                 //Fetch food facilities data from Server
                 fetchFoodFacilitiesData(null);
                 break;

@@ -12,15 +12,14 @@ import retrofit2.Response;
  */
 public class NetworkUtils {
     /**
-     * check's network call status
+     * Method to check network call status
      * success - if statusCode is between 200 && 400
      * failure - else cases are failure
-     * also if status is 406 the revalidates user if enabled
-     * @param context
+     *
      * @param response
      * @return true or false
      */
-    public static boolean isCallSuccess(final Context context, Response response) {
+    public static boolean isCallSuccess(Response response) {
 
         int code = response.code();
         if (code >= 200 && code < 400) {
@@ -30,9 +29,10 @@ public class NetworkUtils {
     }
 
     /**
-     * Handle Network Call Failure
+     * Method to handle network call failure
+     *
      * @param context
-     * @param t Determines the type of failure and hence the error message.
+     * @param t       Determines the type of failure and hence the error message.
      */
     public static void handleCallFailure(final Context context, Throwable t) {
 

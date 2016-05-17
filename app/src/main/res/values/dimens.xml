@@ -1,40 +1,16 @@
 <resources>
-    <!-- Default screen margins, per the Android Design guidelines. -->
-    <dimen name="activity_horizontal_margin">16dp</dimen>
-    <dimen name="activity_vertical_margin">16dp</dimen>
-    <dimen name="fab_margin">16dp</dimen>
-
     <!-- Use standard View Margin -->
     <dimen name="margin_base">8dp</dimen>
-    <dimen name="margin_low">4dp</dimen>
-    <dimen name="margin_v_low">2dp</dimen>
-    <dimen name="margin_medium">12dp</dimen>
-    <dimen name="margin_high">16dp</dimen>
-    <dimen name="margin_xhigh">24dp</dimen>
-    <dimen name="margin_xxhigh">28dp</dimen>
-    <dimen name="margin_huge">56dp</dimen>
-    <dimen name="margin_max">72dp</dimen>
 
     <!-- Use standard View Padding -->
     <dimen name="padding_base">8dp</dimen>
-    <dimen name="padding_low">4dp</dimen>
-    <dimen name="padding_v_low">2dp</dimen>
     <dimen name="padding_medium">12dp</dimen>
     <dimen name="padding_high">16dp</dimen>
-    <dimen name="padding_xhigh">24dp</dimen>
-    <dimen name="padding_xxhigh">28dp</dimen>
-    <dimen name="padding_huge">56dp</dimen>
-    <dimen name="padding_max">72dp</dimen>
-
-    <dimen name="padding_list_content">48dp</dimen>
+    <dimen name="padding_huge">48dp</dimen>
 
     <!-- Use standard Font Sizes -->
     <dimen name="text_base">14sp</dimen>
-    <dimen name="text_small">12sp</dimen>
-    <dimen name="text_medium">16sp</dimen>
     <dimen name="text_large">20sp</dimen>
-    <dimen name="text_xlarge">24sp</dimen>
-    <dimen name="text_xxlarge">34sp</dimen>
 
     <dimen name="toolbar_height">@dimen/abc_action_bar_default_height_material</dimen>
 

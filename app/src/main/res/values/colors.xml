@@ -9,16 +9,11 @@
 
     <!-- Text Colors: for light background-->
     <color name="text_base">#2a2a2a</color>
-    <color name="text_secondary">#666666</color>
-    <color name="text_tertiary">#929292</color>
-    <color name="text_gray">#7e666666</color>
-    <color name="text_error">#DD2C00</color>
-
+    <color name="text_light">#777777</color>
     <color name="text_light_bg">#ffffff</color>
 
     <!-- Base theme colors-->
     <color name="app_primary">#3e4386</color>
-    <color name="app_background">#ffffff</color>
     <color name="app_background_light">#d1d6e7</color>
 
     <!-- toolbar color-->

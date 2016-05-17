@@ -1,10 +1,7 @@
 package com.piyush.foodiebay;
 
-import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 
@@ -18,37 +15,17 @@ public class BaseActivity extends AppCompatActivity{
     //to be only accessed through methods, do not change access modifier
     private FrameLayout loadingLayout;
 
-    // Call this on very start of every activity
-    /**
-     * default toolbar with no title and app's primary color as background
-     */
-    public void initToolbar() {
-        setupToolbar(null, null);
+    public Toolbar getToolbar() {
+        return toolbar;
     }
 
     /**
      * default toolbar with title and app's primary color as background
      *
-     * @param title
      */
-    public void initToolbar(String title) {
-        setupToolbar(title, null);
-    }
-
-    private void setupToolbar(String title, String subTitle) {
-
+    public void initToolbar() {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("");
-        toolbar.setTitleTextColor(Color.WHITE);
-        toolbar.setSubtitleTextColor(Color.WHITE);
-
-        if (title != null && title.length() > 0) {
-            toolbar.setTitle(title);
-        }
-
-        if (subTitle != null && subTitle.length() > 0) {
-            toolbar.setSubtitle(subTitle);
-        }
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
