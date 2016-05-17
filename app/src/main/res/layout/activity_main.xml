@@ -19,12 +19,12 @@
             android:src="@drawable/app_icon" />
 
         <TextView
+            style="@style/TextAppearance.ActionBarTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingLeft="@dimen/padding_base"
-            android:text="@string/app_name"
-            style="@style/TextAppearance.ActionBarTitle"/>
-        </android.support.v7.widget.Toolbar>
+            android:text="@string/app_name" />
+    </android.support.v7.widget.Toolbar>
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -51,12 +51,11 @@
 
                     <ImageView
                         android:id="@+id/main.filter_icon"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
                         android:layout_gravity="start|center_vertical"
                         android:layout_marginLeft="@dimen/margin_base"
                         android:paddingBottom="@dimen/padding_base"
-                        android:paddingRight="@dimen/padding_base"
                         android:paddingTop="@dimen/padding_base"
                         android:src="@drawable/ic_filter" />
 
@@ -64,11 +63,10 @@
                         android:id="@+id/main.filter_spinner"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="right|center_vertical"
+                        android:layout_gravity="center_vertical"
                         android:background="?android:selectableItemBackground"
-                        android:gravity="center"
                         android:paddingBottom="@dimen/padding_high"
-                        android:paddingLeft="48dp"
+                        android:paddingLeft="@dimen/padding_huge"
                         android:paddingRight="@dimen/padding_base"
                         android:paddingTop="@dimen/padding_high"
                         android:theme="@style/AppTheme.AppBarOverlay" />

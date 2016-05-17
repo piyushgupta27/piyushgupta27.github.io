@@ -17,6 +17,5 @@ public class MyApplication extends Application {
 
         // Initialize Crashlytics in order to get Crash reports
         Fabric.with(this, new Crashlytics());
-
     }
 }

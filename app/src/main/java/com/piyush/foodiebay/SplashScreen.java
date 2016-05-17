@@ -59,6 +59,8 @@ public class SplashScreen extends AppCompatActivity {
                             //Intent to start MainActivity on animation completion
                             Intent mainActivityIntent = new Intent(SplashScreen.this, MainActivity.class);
                             startActivity(mainActivityIntent);
+                            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+
                             finish();
                         }
 

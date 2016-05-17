@@ -1,10 +1,8 @@
 package com.piyush.foodiebay.network.models;
 
 import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.clustering.ClusterItem;
-import com.piyush.foodiebay.R;
 
 /**
  * Created by piyush on 14/05/16.
